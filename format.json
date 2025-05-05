@@ -1,0 +1,19 @@
+{
+  "Monday": [ // Day name as key
+    {
+      "startTime": "HH:MM",        // e.g., "09:00"
+      "endTime": "HH:MM",          // e.g., "09:55"
+      "activityName": "Subject/Activity Name", // e.g., "Pharmacology-3 (T)", "LIBRARY", "Practical..."
+      "code": "Subject Code",      // e.g., "BP-602T", "BP-608P", or null for non-subjects
+      "type": "Activity Type",    // e.g., "Theory", "Practical", "Library", "Seminar", "Break"
+      "faculty": "Faculty Name",   // e.g., "Ms. Komal", or null if not applicable/unknown
+      "group": "Group Identifier", // e.g., "Grp-1", "Grp-2", or null if not applicable
+      "location": "Room/Lab Name" // e.g., "P' Cology Lab-2", "LH-1", or null if default/unknown
+    }
+    // ... more periods for Monday
+  ],
+  "Tuesday": [
+    // ... periods for Tuesday
+  ]
+  // ... other days
+}

@@ -1,0 +1,434 @@
+{
+  "Monday": [
+    {
+      "startTime": "09:00",
+      "endTime": "09:55",
+      "activityName": "LIBRARY",
+      "code": null,
+      "type": "Library",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "09:55",
+      "endTime": "10:50",
+      "activityName": "Herbal Drug Technology (T)",
+      "code": "BP-603T",
+      "type": "Theory",
+      "faculty": "Ms. Archana",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "10:50",
+      "endTime": "11:45",
+      "activityName": "LIBRARY",
+      "code": null,
+      "type": "Library",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "11:45",
+      "endTime": "12:40",
+      "activityName": "Pharmaceutical Biotechnology (T)",
+      "code": "BP-605T",
+      "type": "Theory",
+      "faculty": "Ms. Priya",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "12:40",
+      "endTime": "13:35",
+      "activityName": "LUNCH",
+      "code": null,
+      "type": "Break",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "13:35",
+      "endTime": "14:30",
+      "activityName": "Pharmacology-3 (T)",
+      "code": "BP-602T",
+      "type": "Theory",
+      "faculty": "Ms. Komal",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "14:30",
+      "endTime": "15:25",
+      "activityName": "Medicinal Chemistry-3 (T)",
+      "code": "BP-601T",
+      "type": "Theory",
+      "faculty": "Dr. Bhartendu Sharma",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "15:25",
+      "endTime": "16:20",
+      "activityName": "Biopharmaceutics & Pharmacokinetics (T)",
+      "code": "BP-604T",
+      "type": "Theory",
+      "faculty": "Ms. Mahak",
+      "group": null,
+      "location": "LH-1"
+    }
+  ],
+  "Tuesday": [
+    {
+      "startTime": "09:00",
+      "endTime": "09:55",
+      "activityName": "Pharmaceutical Biotechnology (T)",
+      "code": "BP-605T",
+      "type": "Theory",
+      "faculty": "Ms. Priya",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "09:55",
+      "endTime": "12:40",
+      "activityName": "Practical Medicinal Chemistry-3 (Grp-1)",
+      "code": "BP-607P",
+      "type": "Practical",
+      "faculty": "Ms. Mahak",
+      "group": "Grp-1",
+      "location": "Chem. Lab-2 / Micro Lab"
+    },
+    {
+      "startTime": "12:40",
+      "endTime": "13:35",
+      "activityName": "LUNCH",
+      "code": null,
+      "type": "Break",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "13:35",
+      "endTime": "14:30",
+      "activityName": "LIBRARY",
+      "code": null,
+      "type": "Library",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "14:30",
+      "endTime": "15:25",
+      "activityName": "Pharmacology-3 (T)",
+      "code": "BP-602T",
+      "type": "Theory",
+      "faculty": "Ms. Komal",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "15:25",
+      "endTime": "16:20",
+      "activityName": "Quality Assurance (T)",
+      "code": "BP-606T",
+      "type": "Theory",
+      "faculty": "Ms. Saroj",
+      "group": null,
+      "location": "LH-1"
+    }
+  ],
+  "Wednesday": [
+    {
+      "startTime": "09:00",
+      "endTime": "11:45",
+      "activityName": "Practical Pharmacology-3 (Grp-1)",
+      "code": "BP-608P",
+      "type": "Practical",
+      "faculty": "Ms. Komal",
+      "group": "Grp-1",
+      "location": "P' Cology Lab-2"
+    },
+    {
+      "startTime": "09:00",
+      "endTime": "11:45",
+      "activityName": "Practical Medicinal Chemistry-3 (Grp-2)",
+      "code": "BP-607P",
+      "type": "Practical",
+      "faculty": "Ms. Mahak",
+      "group": "Grp-2",
+      "location": "Chem. Lab-2 / Micro Lab"
+    },
+    {
+      "startTime": "11:45",
+      "endTime": "12:40",
+      "activityName": "Herbal Drug Technology (T)",
+      "code": "BP-603T",
+      "type": "Theory",
+      "faculty": "Ms. Archana",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "12:40",
+      "endTime": "13:35",
+      "activityName": "LUNCH",
+      "code": null,
+      "type": "Break",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "13:35",
+      "endTime": "14:30",
+      "activityName": "Medicinal Chemistry-3 (T)",
+      "code": "BP-601T",
+      "type": "Theory",
+      "faculty": "Dr. Bhartendu Sharma",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "14:30",
+      "endTime": "15:25",
+      "activityName": "Biopharmaceutics & Pharmacokinetics (T)",
+      "code": "BP-604T",
+      "type": "Theory",
+      "faculty": "Ms. Mahak",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "15:25",
+      "endTime": "16:20",
+      "activityName": "Quality Assurance (T)",
+      "code": "BP-606T",
+      "type": "Theory",
+      "faculty": "Ms. Saroj",
+      "group": null,
+      "location": "LH-1"
+    }
+  ],
+  "Thursday": [
+    {
+      "startTime": "09:00",
+      "endTime": "09:55",
+      "activityName": "Quality Assurance (T)",
+      "code": "BP-606T",
+      "type": "Theory",
+      "faculty": "Ms. Saroj",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "09:55",
+      "endTime": "10:50",
+      "activityName": "Pharmacology-3 (T)",
+      "code": "BP-602T",
+      "type": "Theory",
+      "faculty": "Ms. Komal",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "10:50",
+      "endTime": "11:45",
+      "activityName": "SEMINAR",
+      "code": null,
+      "type": "Seminar",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "11:45",
+      "endTime": "12:40",
+      "activityName": "Biopharmaceutics & Pharmacokinetics (T)",
+      "code": "BP-604T",
+      "type": "Theory",
+      "faculty": "Ms. Mahak",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "12:40",
+      "endTime": "13:35",
+      "activityName": "LUNCH",
+      "code": null,
+      "type": "Break",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "13:35",
+      "endTime": "14:30",
+      "activityName": "Pharmaceutical Biotechnology (T)",
+      "code": "BP-605T",
+      "type": "Theory",
+      "faculty": "Ms. Priya",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "14:30",
+      "endTime": "15:25",
+      "activityName": "Biopharmaceutics & Pharmacokinetics (T)",
+      "code": "BP-604T",
+      "type": "Theory",
+      "faculty": "Ms. Mahak",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "15:25",
+      "endTime": "16:20",
+      "activityName": "LIBRARY",
+      "code": null,
+      "type": "Library",
+      "faculty": null,
+      "group": null,
+      "location": null
+    }
+  ],
+  "Friday": [
+    {
+      "startTime": "09:00",
+      "endTime": "09:55",
+      "activityName": "LIBRARY",
+      "code": null,
+      "type": "Library",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "09:55",
+      "endTime": "10:50",
+      "activityName": "Herbal Drug Technology (T)",
+      "code": "BP-603T",
+      "type": "Theory",
+      "faculty": "Ms. Archana",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "10:50",
+      "endTime": "11:45",
+      "activityName": "LIBRARY",
+      "code": null,
+      "type": "Library",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "11:45",
+      "endTime": "12:40",
+      "activityName": "Medicinal Chemistry-3 (T)",
+      "code": "BP-601T",
+      "type": "Theory",
+      "faculty": "Dr. Bhartendu Sharma",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "12:40",
+      "endTime": "13:35",
+      "activityName": "LUNCH",
+      "code": null,
+      "type": "Break",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "13:35",
+      "endTime": "16:20",
+      "activityName": "Practical Herbal Drug Technology (Grp-1)",
+      "code": "BP-609P",
+      "type": "Practical",
+      "faculty": "Ms. Archana",
+      "group": "Grp-1",
+      "location": "P'Cognosy Lab"
+    }
+  ],
+  "Saturday": [
+    {
+      "startTime": "09:00",
+      "endTime": "09:55",
+      "activityName": "Pharmaceutical Biotechnology (T)",
+      "code": "BP-605T",
+      "type": "Theory",
+      "faculty": "Ms. Priya",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "09:55",
+      "endTime": "10:50",
+      "activityName": "SEMINAR",
+      "code": null,
+      "type": "Seminar",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "10:50",
+      "endTime": "11:45",
+      "activityName": "Pharmacology-3 (T)",
+      "code": "BP-602T",
+      "type": "Theory",
+      "faculty": "Ms. Komal",
+      "group": null,
+      "location": "LH-1"
+    },
+    {
+      "startTime": "11:45",
+      "endTime": "12:40",
+      "activityName": "LIBRARY",
+      "code": null,
+      "type": "Library",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "12:40",
+      "endTime": "13:35",
+      "activityName": "LUNCH",
+      "code": null,
+      "type": "Break",
+      "faculty": null,
+      "group": null,
+      "location": null
+    },
+    {
+      "startTime": "13:35",
+      "endTime": "16:20",
+      "activityName": "Practical Herbal Drug Technology (Grp-2)",
+      "code": "BP-609P",
+      "type": "Practical",
+      "faculty": "Ms. Archana",
+      "group": "Grp-2",
+      "location": "P'Cognosy Lab"
+    },
+    {
+      "startTime": "13:35",
+      "endTime": "16:20",
+      "activityName": "Practical Pharmacology-3 (Grp-2)",
+      "code": "BP-608P",
+      "type": "Practical",
+      "faculty": "Ms. Komal",
+      "group": "Grp-2",
+      "location": "P' Cology Lab-2"
+    }
+  ]
+}

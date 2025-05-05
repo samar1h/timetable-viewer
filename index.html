@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable Viewer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <!-- Alpine JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Date-fns for date manipulation -->
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/+esm"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen" x-data="timetableApp()" x-init="init()" x-cloak>
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-2xl font-bold text-center mb-2">Timetable Viewer</h1>
+            <div class="flex flex-col sm:flex-row gap-2 justify-between items-center">
+                <div class="flex gap-2">
+                    <button @click="currentView = 'now'" :class="{'bg-blue-600': currentView === 'now'}" class="px-3 py-1 rounded-md text-sm">Now</button>
+                    <button @click="currentView = 'today'" :class="{'bg-blue-600': currentView === 'today'}" class="px-3 py-1 rounded-md text-sm">Today</button>
+                    <button @click="currentView = 'week'" :class="{'bg-blue-600': currentView === 'week'}" class="px-3 py-1 rounded-md text-sm">Week</button>
+                    <button @click="currentView = 'search'" :class="{'bg-blue-600': currentView === 'search'}" class="px-3 py-1 rounded-md text-sm">Search</button>
+                </div>
+                <input type="file" id="fileInput" class="hidden" @change="handleFileUpload">
+                <button @click="document.getElementById('fileInput').click()" class="px-3 py-1 bg-gray-700 rounded-md text-sm">Upload Timetable</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="bg-gray-800 rounded-lg p-4 shadow-lg">
+            <!-- Loading/Error State -->
+            <div x-show="loading" class="text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+                <p>Loading timetable...</p>
+            </div>
+
+            <div x-show="error" class="bg-red-900/50 p-4 rounded-md mb-4">
+                <p x-text="error"></p>
+                <button @click="loadDefaultTimetable()" class="mt-2 px-3 py-1 bg-blue-600 rounded-md text-sm">Retry</button>
+            </div>
+
+            <!-- Now View -->
+            <div x-show="!loading && !error && currentView === 'now'">
+                <h2 class="text-xl font-semibold mb-4">Current Lecture</h2>
+                <div x-show="!currentLecture" class="text-center py-4 text-gray-400">
+                    No lecture currently happening
+                </div>
+                <div x-show="currentLecture" class="bg-gray-700 p-4 rounded-md">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-medium text-lg" x-text="currentLecture.activityName"></h3>
+                        <span class="bg-blue-600 px-2 py-1 rounded text-xs" x-text="currentLecture.type"></span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div><span class="text-gray-400">Time:</span> <span x-text="`${currentLecture.startTime} - ${currentLecture.endTime}`"></span></div>
+                        <div><span class="text-gray-400">Faculty:</span> <span x-text="currentLecture.faculty || 'N/A'"></span></div>
+                        <div><span class="text-gray-400">Location:</span> <span x-text="currentLecture.location || 'N/A'"></span></div>
+                        <div><span class="text-gray-400">Code:</span> <span x-text="currentLecture.code || 'N/A'"></span></div>
+                    </div>
+                </div>
+
+                <h2 class="text-xl font-semibold mt-6 mb-4">Upcoming Lectures</h2>
+                <div x-show="upcomingLectures.length === 0" class="text-center py-4 text-gray-400">
+                    No upcoming lectures
+                </div>
+                <div class="space-y-2">
+                    <template x-for="lecture in upcomingLectures" :key="lecture.startTime + lecture.activityName">
+                        <div class="bg-gray-700 p-3 rounded-md">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-medium" x-text="lecture.activityName"></h3>
+                                <span class="bg-green-600 px-2 py-0.5 rounded text-xs" x-text="lecture.type"></span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1 text-sm">
+                                <div><span class="text-gray-400">Time:</span> <span x-text="`${lecture.startTime} - ${lecture.endTime}`"></span></div>
+                                <div><span class="text-gray-400">In:</span> <span x-text="timeUntil(lecture.startTime)"></span></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Today View -->
+            <div x-show="!loading && !error && currentView === 'today'">
+                <h2 class="text-xl font-semibold mb-4" x-text="'Today - ' + currentDay"></h2>
+                <div x-show="todaysLectures.length === 0" class="text-center py-4 text-gray-400">
+                    No lectures scheduled for today
+                </div>
+                <div class="space-y-2">
+                    <template x-for="lecture in todaysLectures" :key="lecture.startTime + lecture.activityName">
+                        <div class="bg-gray-700 p-3 rounded-md" :class="{'ring-2 ring-blue-500': isCurrentLecture(lecture)}">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-medium" x-text="lecture.activityName"></h3>
+                                <div class="flex gap-1">
+                                    <span class="bg-blue-600 px-2 py-0.5 rounded text-xs" x-text="lecture.type"></span>
+                                    <span x-show="isCurrentLecture(lecture)" class="bg-green-600 px-2 py-0.5 rounded text-xs">NOW</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1 text-sm">
+                                <div><span class="text-gray-400">Time:</span> <span x-text="`${lecture.startTime} - ${lecture.endTime}`"></span></div>
+                                <div><span class="text-gray-400">Faculty:</span> <span x-text="lecture.faculty || 'N/A'"></span></div>
+                                <div><span class="text-gray-400">Location:</span> <span x-text="lecture.location || 'N/A'"></span></div>
+                                <div><span class="text-gray-400">Code:</span> <span x-text="lecture.code || 'N/A'"></span></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="mt-6" x-show="hasLabsToday">
+                    <h3 class="font-semibold mb-2">Lab Classes Today</h3>
+                    <div class="space-y-2">
+                        <template x-for="lecture in todaysLabLectures" :key="lecture.startTime + lecture.activityName">
+                            <div class="bg-gray-700 p-3 rounded-md">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-medium" x-text="lecture.activityName"></h3>
+                                    <span class="bg-purple-600 px-2 py-0.5 rounded text-xs">LAB</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1 text-sm">
+                                    <div><span class="text-gray-400">Time:</span> <span x-text="`${lecture.startTime} - ${lecture.endTime}`"></span></div>
+                                    <div><span class="text-gray-400">Location:</span> <span x-text="lecture.location || 'N/A'"></span></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Week View -->
+            <div x-show="!loading && !error && currentView === 'week'">
+                <h2 class="text-xl font-semibold mb-4">Weekly Timetable</h2>
+                <div class="flex overflow-x-auto scrollbar-hide mb-4">
+                    <template x-for="day in Object.keys(timetable)" :key="day">
+                        <button @click="selectedDay = day" :class="{'bg-blue-600': selectedDay === day}" class="px-4 py-2 rounded-md mr-2 whitespace-nowrap" x-text="day"></button>
+                    </template>
+                </div>
+                
+                <div x-show="timetable[selectedDay] && timetable[selectedDay].length > 0">
+                    <div class="space-y-2">
+                        <template x-for="lecture in timetable[selectedDay]" :key="lecture.startTime + lecture.activityName">
+                            <div class="bg-gray-700 p-3 rounded-md">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-medium" x-text="lecture.activityName"></h3>
+                                    <span class="bg-blue-600 px-2 py-0.5 rounded text-xs" x-text="lecture.type"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1 text-sm">
+                                    <div><span class="text-gray-400">Time:</span> <span x-text="`${lecture.startTime} - ${lecture.endTime}`"></span></div>
+                                    <div><span class="text-gray-400">Faculty:</span> <span x-text="lecture.faculty || 'N/A'"></span></div>
+                                    <div><span class="text-gray-400">Location:</span> <span x-text="lecture.location || 'N/A'"></span></div>
+                                    <div><span class="text-gray-400">Code:</span> <span x-text="lecture.code || 'N/A'"></span></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div x-show="!timetable[selectedDay] || timetable[selectedDay].length === 0" class="text-center py-4 text-gray-400">
+                    No lectures scheduled for this day
+                </div>
+            </div>
+
+            <!-- Search View -->
+            <div x-show="!loading && !error && currentView === 'search'">
+                <h2 class="text-xl font-semibold mb-4">Search Timetable</h2>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium mb-2">Find by Time</h3>
+                    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                        <select x-model="searchDay" class="bg-gray-700 rounded-md p-2 flex-1">
+                            <option value="">Select Day</option>
+                            <template x-for="day in Object.keys(timetable)" :key="day">
+                                <option :value="day" x-text="day"></option>
+                            </template>
+                        </select>
+                        <input type="time" x-model="searchTime" class="bg-gray-700 rounded-md p-2 flex-1">
+                        <button @click="findLectureByTime()" class="bg-blue-600 rounded-md p-2 px-4">Find</button>
+                    </div>
+                    
+                    <div x-show="searchedLecture" class="bg-gray-700 p-4 rounded-md">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-medium text-lg" x-text="searchedLecture.activityName"></h3>
+                            <span class="bg-blue-600 px-2 py-1 rounded text-xs" x-text="searchedLecture.type"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div><span class="text-gray-400">Time:</span> <span x-text="`${searchedLecture.startTime} - ${searchedLecture.endTime}`"></span></div>
+                            <div><span class="text-gray-400">Faculty:</span> <span x-text="searchedLecture.faculty || 'N/A'"></span></div>
+                            <div><span class="text-gray-400">Location:</span> <span x-text="searchedLecture.location || 'N/A'"></span></div>
+                            <div><span class="text-gray-400">Code:</span> <span x-text="searchedLecture.code || 'N/A'"></span></div>
+                        </div>
+                    </div>
+                    <div x-show="searchTime && !searchedLecture" class="text-center py-4 text-gray-400">
+                        No lecture found at this time
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium mb-2">Find by Subject</h3>
+                    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                        <input type="text" x-model="searchSubject" placeholder="Subject name or code" class="bg-gray-700 rounded-md p-2 flex-1">
+                        <button @click="findLecturesBySubject()" class="bg-blue-600 rounded-md p-2 px-4">Search</button>
+                    </div>
+                    
+                    <div x-show="subjectLectures.length > 0">
+                        <h4 class="font-medium mb-2" x-text="'Found ' + subjectLectures.length + ' lectures'"></h4>
+                        <div class="space-y-2">
+                            <template x-for="lecture in subjectLectures" :key="lecture.day + lecture.startTime + lecture.activityName">
+                                <div class="bg-gray-700 p-3 rounded-md">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <div>
+                                            <h3 class="font-medium" x-text="lecture.activityName"></h3>
+                                            <span class="text-xs text-gray-400" x-text="lecture.day"></span>
+                                        </div>
+                                        <span class="bg-blue-600 px-2 py-0.5 rounded text-xs" x-text="lecture.type"></span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-1 text-sm">
+                                        <div><span class="text-gray-400">Time:</span> <span x-text="`${lecture.startTime} - ${lecture.endTime}`"></span></div>
+                                        <div><span class="text-gray-400">Location:</span> <span x-text="lecture.location || 'N/A'"></span></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div x-show="searchSubject && subjectLectures.length === 0" class="text-center py-4 text-gray-400">
+                        No lectures found for this subject
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium mb-2">Find Next Class</h3>
+                    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                        <input type="text" x-model="nextClassSubject" placeholder="Subject name or code" class="bg-gray-700 rounded-md p-2 flex-1">
+                        <button @click="findNextClass()" class="bg-blue-600 rounded-md p-2 px-4">Find Next</button>
+                    </div>
+                    
+                    <div x-show="nextClass" class="bg-gray-700 p-4 rounded-md">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="font-medium text-lg" x-text="nextClass.activityName"></h3>
+                                <span class="text-sm text-gray-400" x-text="nextClass.day"></span>
+                            </div>
+                            <span class="bg-blue-600 px-2 py-1 rounded text-xs" x-text="nextClass.type"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div><span class="text-gray-400">Time:</span> <span x-text="`${nextClass.startTime} - ${nextClass.endTime}`"></span></div>
+                            <div><span class="text-gray-400">In:</span> <span x-text="timeUntilNextClass(nextClass)"></span></div>
+                            <div><span class="text-gray-400">Location:</span> <span x-text="nextClass.location || 'N/A'"></span></div>
+                            <div><span class="text-gray-400">Faculty:</span> <span x-text="nextClass.faculty || 'N/A'"></span></div>
+                        </div>
+                    </div>
+                    <div x-show="nextClassSubject && !nextClass" class="text-center py-4 text-gray-400">
+                        No upcoming classes found for this subject
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('timetableApp', () => ({
+                timetable: {},
+                loading: true,
+                error: null,
+                currentView: 'now',
+                selectedDay: 'Monday',
+                currentDay: '',
+                currentLecture: null,
+                upcomingLectures: [],
+                todaysLectures: [],
+                todaysLabLectures: [],
+                hasLabsToday: false,
+                
+                // Search variables
+                searchDay: '',
+                searchTime: '',
+                searchedLecture: null,
+                searchSubject: '',
+                subjectLectures: [],
+                nextClassSubject: '',
+                nextClass: null,
+                
+                init() {
+                    this.loadTimetable();
+                    this.setupAutoRefresh();
+                },
+                
+                async loadTimetable() {
+                    try {
+                        this.loading = true;
+                        this.error = null;
+                        
+                        // Try to load from localStorage first
+                        const savedTimetable = localStorage.getItem('timetable');
+                        if (savedTimetable) {
+                            this.timetable = JSON.parse(savedTimetable);
+                            this.updateTodaysData();
+                            this.loading = false;
+                            return;
+                        }
+                        
+                        // If not in localStorage, try to load default file
+                        await this.loadDefaultTimetable();
+                    } catch (err) {
+                        this.error = "Failed to load timetable. Please upload your timetable file.";
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async loadDefaultTimetable() {
+                    try {
+                        const response = await fetch('./bhparm-tt.json');
+                        if (!response.ok) throw new Error('Failed to fetch timetable');
+                        this.timetable = await response.json();
+                        localStorage.setItem('timetable', JSON.stringify(this.timetable));
+                        this.updateTodaysData();
+                    } catch (err) {
+                        throw new Error('Default timetable not found. Please upload your timetable file.');
+                    }
+                },
+                
+                handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            this.timetable = data;
+                            localStorage.setItem('timetable', JSON.stringify(data));
+                            this.updateTodaysData();
+                            this.error = null;
+                        } catch (err) {
+                            this.error = "Invalid timetable file. Please upload a valid JSON file.";
+                            console.error(err);
+                        }
+                    };
+                    reader.readAsText(file);
+                    event.target.value = ''; // Reset file input
+                },
+                
+                updateTodaysData() {
+                    if (!this.timetable) return;
+                    
+                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    const today = new Date();
+                    this.currentDay = days[today.getDay()];
+                    
+                    // Get today's lectures
+                    this.todaysLectures = this.timetable[this.currentDay] || [];
+                    
+                    // Filter lab classes for today
+                    this.todaysLabLectures = this.todaysLectures.filter(lecture => 
+                        lecture.type && lecture.type.toLowerCase().includes('practical')
+                    );
+                    this.hasLabsToday = this.todaysLabLectures.length > 0;
+                    
+                    // Find current and upcoming lectures
+                    this.findCurrentAndUpcomingLectures();
+                },
+                
+                findCurrentAndUpcomingLectures() {
+                    if (!this.todaysLectures || this.todaysLectures.length === 0) {
+                        this.currentLecture = null;
+                        this.upcomingLectures = [];
+                        return;
+                    }
+                    
+                    const now = new Date();
+                    const currentTime = now.getHours() * 100 + now.getMinutes();
+                    
+                    let current = null;
+                    const upcoming = [];
+                    
+                    for (const lecture of this.todaysLectures) {
+                        const [startH, startM] = lecture.startTime.split(':').map(Number);
+                        const [endH, endM] = lecture.endTime.split(':').map(Number);
+                        
+                        const startTime = startH * 100 + startM;
+                        const endTime = endH * 100 + endM;
+                        
+                        if (currentTime >= startTime && currentTime <= endTime) {
+                            current = lecture;
+                        } else if (currentTime < startTime) {
+                            upcoming.push(lecture);
+                        }
+                    }
+                    
+                    this.currentLecture = current;
+                    this.upcomingLectures = upcoming;
+                },
+                
+                isCurrentLecture(lecture) {
+                    if (!lecture || !this.currentLecture) return false;
+                    return (
+                        lecture.startTime === this.currentLecture.startTime && 
+                        lecture.activityName === this.currentLecture.activityName
+                    );
+                },
+                
+                timeUntil(timeStr) {
+                    const now = new Date();
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    const targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+                    
+                    if (targetTime <= now) return "Now";
+                    
+                    const diffMs = targetTime - now;
+                    const diffMins = Math.round(diffMs / (1000 * 60));
+                    
+                    if (diffMins < 60) return `in ${diffMins} min`;
+                    
+                    const diffHours = Math.floor(diffMins / 60);
+                    const remainingMins = diffMins % 60;
+                    return `in ${diffHours}h ${remainingMins}m`;
+                },
+                
+                findLectureByTime() {
+                    if (!this.searchDay || !this.searchTime) return;
+                    
+                    const dayLectures = this.timetable[this.searchDay];
+                    if (!dayLectures) {
+                        this.searchedLecture = null;
+                        return;
+                    }
+                    
+                    const [searchH, searchM] = this.searchTime.split(':').map(Number);
+                    const searchTime = searchH * 100 + searchM;
+                    
+                    for (const lecture of dayLectures) {
+                        const [startH, startM] = lecture.startTime.split(':').map(Number);
+                        const [endH, endM] = lecture.endTime.split(':').map(Number);
+                        
+                        const startTime = startH * 100 + startM;
+                        const endTime = endH * 100 + endM;
+                        
+                        if (searchTime >= startTime && searchTime <= endTime) {
+                            this.searchedLecture = lecture;
+                            return;
+                        }
+                    }
+                    
+                    this.searchedLecture = null;
+                },
+                
+                findLecturesBySubject() {
+                    if (!this.searchSubject) return;
+                    
+                    const searchTerm = this.searchSubject.toLowerCase();
+                    this.subjectLectures = [];
+                    
+                    for (const day in this.timetable) {
+                        for (const lecture of this.timetable[day]) {
+                            if (
+                                (lecture.activityName && lecture.activityName.toLowerCase().includes(searchTerm)) ||
+                                (lecture.code && lecture.code.toLowerCase().includes(searchTerm))
+                            ) {
+                                this.subjectLectures.push({
+                                    ...lecture,
+                                    day: day
+                                });
+                            }
+                        }
+                    }
+                },
+                
+                findNextClass() {
+                    if (!this.nextClassSubject) return;
+                    
+                    const searchTerm = this.nextClassSubject.toLowerCase();
+                    const now = new Date();
+                    const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
+                    const currentTime = now.getHours() * 100 + now.getMinutes();
+                    
+                    let nextClass = null;
+                    let minDiff = Infinity;
+                    
+                    // Check today's remaining classes first
+                    const todayLectures = this.timetable[currentDay] || [];
+                    for (const lecture of todayLectures) {
+                        const [startH, startM] = lecture.startTime.split(':').map(Number);
+                        const startTime = startH * 100 + startM;
+                        
+                        if (
+                            startTime > currentTime && 
+                            (
+                                (lecture.activityName && lecture.activityName.toLowerCase().includes(searchTerm)) ||
+                                (lecture.code && lecture.code.toLowerCase().includes(searchTerm))
+                            )
+                        ) {
+                            const diff = startTime - currentTime;
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                nextClass = {
+                                    ...lecture,
+                                    day: currentDay
+                                };
+                            }
+                        }
+                    }
+                    
+                    // If nothing found today, check upcoming days
+                    if (!nextClass) {
+                        const days = Object.keys(this.timetable);
+                        const currentDayIndex = days.indexOf(currentDay);
+                        
+                        for (let i = 1; i <= 7; i++) {
+                            const dayIndex = (currentDayIndex + i) % 7;
+                            const day = days[dayIndex];
+                            const dayLectures = this.timetable[day] || [];
+                            
+                            for (const lecture of dayLectures) {
+                                if (
+                                    (lecture.activityName && lecture.activityName.toLowerCase().includes(searchTerm)) ||
+                                    (lecture.code && lecture.code.toLowerCase().includes(searchTerm))
+                                ) {
+                                    const [startH, startM] = lecture.startTime.split(':').map(Number);
+                                    const startTime = startH * 100 + startM;
+                                    
+                                    // For future days, we consider the first matching lecture of the day
+                                    nextClass = {
+                                        ...lecture,
+                                        day: day
+                                    };
+                                    this.nextClass = nextClass;
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    
+                    this.nextClass = nextClass;
+                },
+                
+                timeUntilNextClass(lecture) {
+                    const now = new Date();
+                    const currentDayIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(now.getDay());
+                    const lectureDayIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].indexOf(lecture.day);
+                    
+                    let daysDiff = lectureDayIndex - currentDayIndex;
+                    if (daysDiff < 0) daysDiff += 7;
+                    
+                    const [hours, minutes] = lecture.startTime.split(':').map(Number);
+                    const targetTime = new Date(
+                        now.getFullYear(),
+                        now.getMonth(),
+                        now.getDate() + daysDiff,
+                        hours,
+                        minutes
+                    );
+                    
+                    const diffMs = targetTime - now;
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    if (diffDays > 0) {
+                        return `in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+                    } else if (diffHours > 0) {
+                        return `in ${diffHours}h ${diffMins}m`;
+                    } else {
+                        return `in ${diffMins}m`;
+                    }
+                },
+                
+                setupAutoRefresh() {
+                    // Refresh every minute to update current/upcoming lectures
+                    setInterval(() => {
+                        this.updateTodaysData();
+                    }, 60000);
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
